@@ -38,7 +38,7 @@ dqN=dqN_pre;
 qN_pre=[0;0;0];
 qN=qN_pre;
 set(0, 'defaultfigurecolor', 'w')
-F1=figure('Position',[40 60 1000 900],'name','lambda = 10')
+F1=figure('Position',[40 60 1000 900],'name',['lambda = ',num2str(P.lambda)])
 st=P.stime/4;
 %% Main loop
 for t=0:P.dt:P.stime
@@ -307,6 +307,7 @@ end
 if strcmp('glnxa64',computer('arch'))
     unix('cd ~/Desktop/paper/latex/ieeeconf;convert xy_plane.bmp xy_plane.eps; convert theta_plane.bmp theta_plane.eps; convert error.bmp error.eps; convert output.bmp output.eps')
 end
+
 %% z1 z2 z3
 % figure('numbertitle','off','name','test')
 % figure('name','PID Observer Z1')
@@ -329,4 +330,6 @@ end
 % plot(P.T,P.K(1,:),'r--',P.T,P.K(2,:),'g:',P.T,P.K(3,:),'b-.');
 %figure('name','NPID NU')
 %plot(P.T,P.NU(1,:),'r--',P.T,P.NU(2,:),'g:',P.T,P.NU(3,:),'b-.');
-save('PID+NPID','P')
+num=['PID+NPID_lambda=',num2str(P.lambda)];
+%save(['PID+NPID_LAMBDA=',num2str(P.lambda)],'P')
+save(num,'P')
