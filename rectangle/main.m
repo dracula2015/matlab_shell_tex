@@ -3,7 +3,6 @@ clear all
 %% ===== Initial parameters
 P.gp=20;
 P.lambda=10;
-
 Parameters;
 tuning_parameter;
 P.Q=[0;0;0];
