@@ -1,5 +1,7 @@
 function [uavc] = OMRS_controller(qd,dqd,ddqd,q,dq)
-
+tic
+t3=clock;
+global T
 global P;
 Ravc=[cos(q(3)), -sin(q(3)), 0;
       sin(q(3)), cos(q(3)), 0;
@@ -26,11 +28,16 @@ Bavc=P.beta2*[-0.5, -0.5, 1;
 %    P.z3=P.z3+P.dt*(P.z4-P.bt3*P.e)
 %    P.z2=P.z2+P.dt*(P.z3+(Mavc^-1)*Bavc*P.u-P.bt2*P.e)
 %    P.z1=P.z1+P.dt*(P.z2-P.bt1*P.e)
-%% five order
+% %% five order
+%    P.e=P.z1-q;
+%    P.z5=P.z5+P.dt*(-P.bt5*P.e);
+%    P.z4=P.z4+P.dt*(P.z5-P.bt4*P.e);
+%    P.z3=P.z3+P.dt*(P.z4-P.bt3*P.e);
+%    P.z2=P.z2+P.dt*(P.z3+P.u-P.bt2*P.e);
+%    P.z1=P.z1+P.dt*(P.z2-P.bt1*P.e);
+%% three order
    P.e=P.z1-q;
-   P.z5=P.z5+P.dt*(-P.bt5*P.e);
-   P.z4=P.z4+P.dt*(P.z5-P.bt4*P.e);
-   P.z3=P.z3+P.dt*(P.z4-P.bt3*P.e);
+   P.z3=P.z3+P.dt*(-P.bt3*P.e);
    P.z2=P.z2+P.dt*(P.z3+P.u-P.bt2*P.e);
    P.z1=P.z1+P.dt*(P.z2-P.bt1*P.e);
 %% error of q
@@ -63,4 +70,7 @@ Bavc=P.beta2*[-0.5, -0.5, 1;
           uavc(3) = -24;
    end
    P.uavc = uavc;
+   t4=clock;
+   T.racTime=etime(t4,t3);
+   P.racTime=toc;
 end

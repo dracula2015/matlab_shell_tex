@@ -3,19 +3,24 @@ function simPrintFunction()
 global P;
 style={'k-','b--','g-.','r:','m:'};
 lineWidth=2;
-P.lambdan=[5 10 15];
 IAESim=[0;0];
 %% paper graphics
 F6=figure('name','x-y plane','position',[50 70 570 450]);
 F7=figure('name','theta plane','position',[60 80 570 450]);
 F8=figure('name','error','position',[70 90 570 450]);
 F9=figure('name','output','position',[80 100 570 450]);
-if strcmp('win64',computer('arch'))
-    load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\PID+NPID_lambda=',num2str(P.lambda),'.mat'])
-elseif strcmp('glnxa64',computer('arch'))
-    load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/PID+NPID_lambda=',num2str(P.lambda),'.mat'])
-end
 
+currentDir=pwd;
+filePath=fullfile(currentDir,['PID+NPID_lambda=',num2str(P.lambda),'.mat']);
+load(filePath);
+
+if 0
+    if strcmp('win64',computer('arch'))
+        load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\PID+NPID_lambda=',num2str(P.lambda),'.mat'])
+    elseif strcmp('glnxa64',computer('arch'))
+        load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/PID+NPID_lambda=',num2str(P.lambda),'.mat'])
+    end
+end
 IAESim=iaeSim(P.Q-P.QD,P.T);
 
 %% Reference and PID response
@@ -72,55 +77,59 @@ hold on
 subplot(313);
 plot(P.T,P.U(3,:),style{1},'LineWidth',lineWidth);
 axis([0 P.stime -30 30])
-xlabel('t(s)','fontname','times new roman','fontweight','bold')
+xlabel('t(s)')
 ylabel('u_3(V)')
 hold on
 
 for i=1:1:length(P.lambdan)
-if strcmp('win64',computer('arch'))
-    load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\PID+NPID_lambda=',num2str(P.lambdan(i)),'.mat'])
-elseif strcmp('glnxa64',computer('arch'))
-    load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/PID+NPID_lambda=',num2str(P.lambdan(i)),'.mat'])
-end
-
-IAESim=[IAESim iaeSim(P.QN-P.QD,P.T)];
-
-%% x-y plane
-figure(F6)
-plot(P.QN(1,:),P.QN(2,:),style{i+2},'LineWidth',lineWidth)
-hold on
-%% theta plane
-figure(F7)
-plot(P.T,P.QN(3,:),style{i+2},'LineWidth',lineWidth);
-hold on
-%% error
-figure(F8)
-% X error
-subplot(311);
-plot(P.T,P.QN(1,:)-P.QD(1,:),style{i+1},'LineWidth',lineWidth);
-hold on
-% Y error
-subplot(312)
-plot(P.T,P.QN(2,:)-P.QD(2,:),style{i+1},'LineWidth',lineWidth);
-hold on
-% theta error
-subplot(313);
-plot(P.T,P.QN(3,:)-P.QD(3,:),style{i+1},'LineWidth',lineWidth);
-hold on
-%% output
-figure(F9)
-% u1 output
-subplot(311);
-plot(P.T,P.UN(1,:),style{i+1},'LineWidth',lineWidth);
-hold on
-% u2 output
-subplot(312)
-plot(P.T,P.UN(2,:),style{i+1},'LineWidth',lineWidth);
-hold on
-% u3 output
-subplot(313);
-plot(P.T,P.UN(3,:),style{i+1},'LineWidth',lineWidth);
-hold on
+    if 0
+        if strcmp('win64',computer('arch'))
+            load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\PID+NPID_lambda=',num2str(P.lambdan(i)),'.mat'])
+        elseif strcmp('glnxa64',computer('arch'))
+            load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/PID+NPID_lambda=',num2str(P.lambdan(i)),'.mat'])
+        end
+    end
+    filePath=fullfile(currentDir,['PID+NPID_lambda=',num2str(P.lambdan(i)),'.mat']);
+    load(filePath);
+    
+    IAESim=[IAESim iaeSim(P.QN-P.QD,P.T)];
+    
+    %% x-y plane
+    figure(F6)
+    plot(P.QN(1,:),P.QN(2,:),style{i+2},'LineWidth',lineWidth)
+    hold on
+    %% theta plane
+    figure(F7)
+    plot(P.T,P.QN(3,:),style{i+2},'LineWidth',lineWidth);
+    hold on
+    %% error
+    figure(F8)
+    % X error
+    subplot(311);
+    plot(P.T,P.QN(1,:)-P.QD(1,:),style{i+1},'LineWidth',lineWidth);
+    hold on
+    % Y error
+    subplot(312)
+    plot(P.T,P.QN(2,:)-P.QD(2,:),style{i+1},'LineWidth',lineWidth);
+    hold on
+    % theta error
+    subplot(313);
+    plot(P.T,P.QN(3,:)-P.QD(3,:),style{i+1},'LineWidth',lineWidth);
+    hold on
+    %% output
+    figure(F9)
+    % u1 output
+    subplot(311);
+    plot(P.T,P.UN(1,:),style{i+1},'LineWidth',lineWidth);
+    hold on
+    % u2 output
+    subplot(312)
+    plot(P.T,P.UN(2,:),style{i+1},'LineWidth',lineWidth);
+    hold on
+    % u3 output
+    subplot(313);
+    plot(P.T,P.UN(3,:),style{i+1},'LineWidth',lineWidth);
+    hold on
 end
 figure(F6)
 L1=legend('Reference','Response(PID)',['Response(NPID)-\lambda=',num2str(P.lambdan(1))],['Response(NPID)-\lambda=',num2str(P.lambdan(2))],['Response(NPID)-\lambda=',num2str(P.lambdan(3))]);
@@ -184,25 +193,38 @@ if 0
     end
 end
 %% New Format Conversion
-if strcmp('win64',computer('arch'))
-    figure(F6)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\xy_plane.eps','epsc')
-    figure(F7)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\theta_plane.eps','epsc')
-    figure(F8)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\error.eps','epsc')
-    figure(F9)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\output.eps','epsc')
-elseif strcmp('glnxa64',computer('arch'))
-    figure(F6)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/xy_plane.eps','epsc')
-    figure(F7)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/theta_plane.eps','epsc')
-    figure(F8)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/error.eps','epsc')
-    figure(F9)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/output.eps','epsc')
+if 0
+    if strcmp('win64',computer('arch'))
+        figure(F6)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\xy_plane.eps','epsc')
+        figure(F7)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\theta_plane.eps','epsc')
+        figure(F8)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\error.eps','epsc')
+        figure(F9)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\output.eps','epsc')
+    elseif strcmp('glnxa64',computer('arch'))
+        figure(F6)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/xy_plane.eps','epsc')
+        figure(F7)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/theta_plane.eps','epsc')
+        figure(F8)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/error.eps','epsc')
+        figure(F9)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/output.eps','epsc')
+    end
 end
+filePath=fullfile(currentDir,'SimExpImages');
+figure(F6)
+saveas(gcf,[filePath,'\xy_plane.eps'],'epsc')
+figure(F7)
+saveas(gcf,[filePath,'\theta_plane.eps'],'epsc')
+figure(F8)
+saveas(gcf,[filePath,'\error.eps'],'epsc')
+figure(F9)
+saveas(gcf,[filePath,'\output.eps'],'epsc')
+
 IAESim
 P.iaeSim=IAESim;
+pwd
 end

@@ -3,7 +3,7 @@ function expPrintFunction()
 global P;
 style={'k-','b--','g-.','r:','m:'};
 lineWidth=2;
-P.date=20170409;
+P.date=201705162221;
 %P.date=20170507
 P.lambdan=[5 10 15];
 P.etime=63;
@@ -13,18 +13,30 @@ F10=figure('name','x-y plane','position',[90 110 570 450]);
 F11=figure('name','theta plane','position',[100 120 570 450]);
 F12=figure('name','error','position',[110 130 570 450]);
 F13=figure('name','output','position',[120 140 570 450]);
-if strcmp('win64',computer('arch'))
-load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second PID disturbance\RobotDesire.mat'])
-load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second PID disturbance\RobotError.mat'])
-load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second PID disturbance\RobotInfo.mat'])
-load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second PID disturbance\RobotData.mat'])
-elseif strcmp('glnxa64',computer('arch'))
-load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second PID disturbance/RobotDesire.mat'])
-load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second PID disturbance/RobotError.mat'])
-load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second PID disturbance/RobotInfo.mat'])
-load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second PID disturbance/RobotData.mat'])
-end
 
+currentDir=pwd;
+filePath=fullfile(currentDir,['OMRS_Experiment_',num2str(P.date)],'1 meters per second PID disturbance','RobotDesire.mat');
+load(filePath)
+filePath=fullfile(currentDir,['OMRS_Experiment_',num2str(P.date)],'1 meters per second PID disturbance','RobotError.mat');
+load(filePath)
+filePath=fullfile(currentDir,['OMRS_Experiment_',num2str(P.date)],'1 meters per second PID disturbance','RobotInfo.mat');
+load(filePath)
+filePath=fullfile(currentDir,['OMRS_Experiment_',num2str(P.date)],'1 meters per second PID disturbance','RobotData.mat');
+load(filePath)
+
+if 0
+    if strcmp('win64',computer('arch'))
+        load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second PID disturbance\RobotDesire.mat'])
+        load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second PID disturbance\RobotError.mat'])
+        load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second PID disturbance\RobotInfo.mat'])
+        load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second PID disturbance\RobotData.mat'])
+    elseif strcmp('glnxa64',computer('arch'))
+        load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second PID disturbance/RobotDesire.mat'])
+        load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second PID disturbance/RobotError.mat'])
+        load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second PID disturbance/RobotInfo.mat'])
+        load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second PID disturbance/RobotData.mat'])
+    end
+end
 IAExp=iaeExp(robotPositionError,timeReceive);
 
 %% Display
@@ -89,61 +101,72 @@ hold on
 subplot(313)
 plot(timeReceive(1,:),controlledU(:,3),style{1},'LineWidth',lineWidth)
 axis([0 P.etime -30 30])
-xlabel('t(s)','fontname','times new roman','fontweight','bold')
+xlabel('t(s)')
 ylabel('u_3(V)')
 hold on
 
 for i=1:1:length(P.lambdan)
-if strcmp('win64',computer('arch'))
-    load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotDesire.mat'])
-    load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotError.mat'])
-    load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotInfo.mat'])
-    load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotData.mat'])
-elseif strcmp('glnxa64',computer('arch'))
-    load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotDesire.mat'])
-    load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotError.mat'])
-    load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotInfo.mat'])
-    load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotData.mat'])
-end
-
-IAExp=[IAExp iaeExp(robotPositionError,timeReceive)];
-
-%% x-y plane
-figure(F10)
-plot(robotPosition(:,1),robotPosition(:,2),style{i+2},'LineWidth',lineWidth)
-hold on
-%% theta plane
-figure(F11)
-plot(timeReceive(1,:),robotPosition(:,3),style{i+2},'LineWidth',lineWidth)
-hold on
-%% error
-figure(F12)
-% X error
-subplot(311);
-plot(timeReceive(1,:),robotPositionError(:,1),style{i+1},'LineWidth',lineWidth)
-hold on
-% Y error
-subplot(312)
-plot(timeReceive(1,:),robotPositionError(:,2),style{i+1},'LineWidth',lineWidth)
-hold on
-% theta error
-subplot(313);
-plot(timeReceive(1,:),robotPositionError(:,3),style{i+1},'LineWidth',lineWidth)
-hold on
-%% output
-figure(F13)
-% u1 output
-subplot(311);
-plot(timeReceive(1,:),controlledU(:,1),style{i+1},'LineWidth',lineWidth)
-hold on
-% u2 output
-subplot(312)
-plot(timeReceive(1,:),controlledU(:,2),style{i+1},'LineWidth',lineWidth)
-hold on
-% u3 output
-subplot(313);
-plot(timeReceive(1,:),controlledU(:,3),style{i+1},'LineWidth',lineWidth)
-hold on
+    if 0
+        if strcmp('win64',computer('arch'))
+            load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotDesire.mat'])
+            load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotError.mat'])
+            load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotInfo.mat'])
+            load(['D:\OMRS_Projection\OMRS\PID+NPID\rectangle\OMRS_Experiment_',num2str(P.date),'\1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotData.mat'])
+        elseif strcmp('glnxa64',computer('arch'))
+            load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotDesire.mat'])
+            load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotError.mat'])
+            load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotInfo.mat'])
+            load(['/media/dracula/文档/OMRS_Projection/OMRS/PID+NPID/rectangle/OMRS_Experiment_',num2str(P.date),'/1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance/RobotData.mat'])
+        end
+    end
+    
+    filePath=fullfile(currentDir,['OMRS_Experiment_',num2str(P.date)],['1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance'],'RobotDesire.mat');
+    load(filePath)
+    filePath=fullfile(currentDir,['OMRS_Experiment_',num2str(P.date)],['1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance'],'RobotError.mat');
+    load(filePath)
+    filePath=fullfile(currentDir,['OMRS_Experiment_',num2str(P.date)],['1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance'],'RobotInfo.mat');
+    load(filePath)
+    filePath=fullfile(currentDir,['OMRS_Experiment_',num2str(P.date)],['1 meters per second NPID lmbda_',num2str(P.lambdan(i)),' disturbance'],'RobotData.mat');
+    load(filePath)
+    
+    IAExp=[IAExp iaeExp(robotPositionError,timeReceive)];
+    
+    %% x-y plane
+    figure(F10)
+    plot(robotPosition(:,1),robotPosition(:,2),style{i+2},'LineWidth',lineWidth)
+    hold on
+    %% theta plane
+    figure(F11)
+    plot(timeReceive(1,:),robotPosition(:,3),style{i+2},'LineWidth',lineWidth)
+    hold on
+    %% error
+    figure(F12)
+    % X error
+    subplot(311);
+    plot(timeReceive(1,:),robotPositionError(:,1),style{i+1},'LineWidth',lineWidth)
+    hold on
+    % Y error
+    subplot(312)
+    plot(timeReceive(1,:),robotPositionError(:,2),style{i+1},'LineWidth',lineWidth)
+    hold on
+    % theta error
+    subplot(313);
+    plot(timeReceive(1,:),robotPositionError(:,3),style{i+1},'LineWidth',lineWidth)
+    hold on
+    %% output
+    figure(F13)
+    % u1 output
+    subplot(311);
+    plot(timeReceive(1,:),controlledU(:,1),style{i+1},'LineWidth',lineWidth)
+    hold on
+    % u2 output
+    subplot(312)
+    plot(timeReceive(1,:),controlledU(:,2),style{i+1},'LineWidth',lineWidth)
+    hold on
+    % u3 output
+    subplot(313);
+    plot(timeReceive(1,:),controlledU(:,3),style{i+1},'LineWidth',lineWidth)
+    hold on
 end
 figure(F10)
 L1=legend('Reference','Response(PID)',['Response(NPID)-\lambda=',num2str(P.lambdan(1))],['Response(NPID)-\lambda=',num2str(P.lambdan(2))],['Response(NPID)-\lambda=',num2str(P.lambdan(3))]);
@@ -203,25 +226,37 @@ if 0
     end
 end
 %% New Format Conversion
-if strcmp('win64',computer('arch'))
-    figure(F10)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\xy_plane_exp.eps','epsc')
-    figure(F11)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\theta_plane_exp.eps','epsc')
-    figure(F12)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\error_exp.eps','epsc')
-    figure(F13)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\output_exp.eps','epsc')
-elseif strcmp('glnxa64',computer('arch'))
-    figure(F10)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/xy_plane_exp.eps','epsc')
-    figure(F11)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/theta_plane_exp.eps','epsc')
-    figure(F12)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/error_exp.eps','epsc')
-    figure(F13)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/output_exp.eps','epsc')
+if 0
+    if strcmp('win64',computer('arch'))
+        figure(F10)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\xy_plane_exp.eps','epsc')
+        figure(F11)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\theta_plane_exp.eps','epsc')
+        figure(F12)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\error_exp.eps','epsc')
+        figure(F13)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\output_exp.eps','epsc')
+    elseif strcmp('glnxa64',computer('arch'))
+        figure(F10)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/xy_plane_exp.eps','epsc')
+        figure(F11)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/theta_plane_exp.eps','epsc')
+        figure(F12)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/error_exp.eps','epsc')
+        figure(F13)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/output_exp.eps','epsc')
+    end
 end
+filePath=fullfile(currentDir,'SimExpImages');
+figure(F10)
+saveas(gcf,[filePath,'\xy_plane_exp.eps'],'epsc')
+figure(F11)
+saveas(gcf,[filePath,'\theta_plane_exp.eps'],'epsc')
+figure(F12)
+saveas(gcf,[filePath,'\error_exp.eps'],'epsc')
+figure(F13)
+saveas(gcf,[filePath,'\output_exp.eps'],'epsc')
+
 IAExp
 P.iaeExp=IAExp;
 end

@@ -1,6 +1,9 @@
 function [DDQ] = OMRS_model(u,q,dq)
 %OMRS_model Summary of this function goes here
 %Detailed explanation goes here
+tic
+t5=clock;
+global T
 global P;
 Rav=[cos(q(3)), -sin(q(3)), 0;
      sin(q(3)), cos(q(3)), 0;
@@ -19,5 +22,8 @@ Cav=C2av*Rav'-M2av*Rav'*DRav*Rav';
 Bav=P.beta2*[-0.5, -0.5, 1;
              0.866, -0.866, 0;
              P.La, P.La, P.La;];
-DDQ=inv(Mav)*(Bav*u-Cav*dq);
+DDQ=Mav\(Bav*u-Cav*dq);
+t6=clock;
+T.modelTime=etime(t6,t5);
+P.modelTime=toc;
 end

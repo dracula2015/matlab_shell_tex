@@ -1,10 +1,13 @@
-clc 
+clc
+clear all
 %% ===== Initial parameters
+global T
 Parameters;
 style={'k-','b--','g-.','r:','m:'};
-P.gp=20;
-P.lambdan=[5,10,15];
-P.lambda=15;
+P.gp=10;
+
+P.lambdan=[5,10,100];
+P.lambda=5;
 P.iaeExp=[];
 P.iaeSim=[];
 
@@ -14,7 +17,7 @@ P.QN=[0;0;0];
 P.QD=[0;0;0];
 P.U=[0;0;0];
 P.UN=[0;0;0];
-P.T=[0];
+P.T=(0);
 P.dt=0.01;
 P.stime=40;
 qd_pre=[0;0;0];
@@ -31,13 +34,19 @@ P.NU=[0;0;0];
 P.DDQD=[0;0;0];
 P.DQD=[0;0;0];
 P.F=[0;0;0];
-
 P.NPIDKP=[0;0;0];
 P.BASCIKP=[0;0;0];
+
+P.time=[];
+T.time=[];
+% P.mainLoopTime=0;
+% P.npidTime=0;
+% P.racTime=0;
+% P.modelTime=0;
 %% Initial state for OMRS_RAC_controller
 dq_pre=[0;0;0];
 dq=dq_pre;
-q_pre=[0;0;0];          %[0;0;0];->[0.6;0;0]; 
+q_pre=[0;0;0];          %[0;0;0];->[0.6;0;0];
 q=q_pre;
 %% Initial state for OMRS_NPID_controller
 dqN_pre=[0;0;0];
@@ -49,88 +58,107 @@ F1=figure('Position',[40 60 1000 900],'name',['lambda = ',num2str(P.lambda)]);
 st=P.stime/4;
 %% Main loop
 for t=0:P.dt:P.stime
-%% rectangle
-if(0<=mod(t,4*st) && mod(t,4*st)<st)
-    x=mod(t,4*st);
-    y=0;
-elseif(st<=mod(t,4*st) && mod(t,4*st)<2*st)
-    x=st;
-    y=mod(t,4*st)-st;
-elseif(2*st<=mod(t,4*st) && mod(t,4*st)<3*st)
-    x=3*st-mod(t,4*st);
-    y=st;
-elseif(3*st<=mod(t,4*st) && mod(t,4*st)<4*st)
-    x=0;
-    y=4*st-mod(t,4*st);
-end;
-x=x/10;
-y=y/10;
-%% lemniscate
-% x=2*sin(0.05*t*pi);
-% y=sin(0.1*t*pi);
-%% circle
-% x=0.8*cos(pi/15*t);
-% y=0.8*sin(pi/15*t);
-if t>15
-     theta=0.35*(t-15); 
-else theta=0;
-end;
-%theta=0;
-
-%% Desired attitude
-qd=[x;y;theta];
-dqd=(qd-qd_pre)/P.dt;
-qd_pre=qd;
-ddqd=(dqd-dqd_pre)/P.dt;
-dqd_pre=dqd;
-
-%% OMRS_controller
-ddq=OMRS_model(OMRS_controller(qd,dqd,ddqd,q,dq),q,dq);
-dq=dq_pre+ddq*P.dt;
-%dq_pre=dq;
-q=q_pre+dq*P.dt; 
-%q_pre=q;
-
-%% OMRS_NPID_controller
-ddqN=OMRS_model(OMRS_NPID_controller(qd,dqd,ddqd,qN,dqN),qN,dqN);
-dqN=dqN_pre+ddqN*P.dt;
-%dqN_pre=dqN;
-qN=qN_pre+dqN*P.dt;
-%qN_pre=qN;
-
-%% disturbance
-if(t==25)
-    q(2)=q(2)+0.2;
-    qN(2)=qN(2)+0.2;
-end;
-if(t==35)
-    q(1)=q(1)+0.2;
-    qN(1)=qN(1)+0.2;
-end;
-dq_pre=dq;
-q_pre=q;
-dqN_pre=dqN;
-qN_pre=qN;
-%% record data
-P.Q=[P.Q q];
-P.QN=[P.QN qN];
-P.QD=[P.QD qd];
-P.U=[P.U P.uavc];
-P.UN=[P.UN P.nuavc];
-P.T=[P.T t];
-P.Z1=[P.Z1 P.z1];
-P.Z2=[P.Z2 P.z2];
-P.Z3=[P.Z3 P.z3];
-P.NZ1=[P.NZ1 P.nz1];
-P.NZ2=[P.NZ2 P.nz2];
-P.NZ3=[P.NZ3 P.nz3];
-P.K=[P.K P.k];
-P.NU=[P.NU P.nu];
-P.DDQD=[P.DDQD ddqd];
-P.DQD=[P.DQD dqd];
-P.F=[P.F P.f];
-t;
-P
+    tic
+    t1=clock;
+    %% rectangle
+    
+    
+    if(0<=mod(t,4*st) && mod(t,4*st)<st)
+        x=mod(t,4*st);
+        y=0;
+    elseif(st<=mod(t,4*st) && mod(t,4*st)<2*st)
+        x=st;
+        y=mod(t,4*st)-st;
+    elseif(2*st<=mod(t,4*st) && mod(t,4*st)<3*st)
+        x=3*st-mod(t,4*st);
+        y=st;
+    elseif(3*st<=mod(t,4*st) && mod(t,4*st)<4*st)
+        x=0;
+        y=4*st-mod(t,4*st);
+    end;
+    x=x/10;
+    y=y/10;
+    %% lemniscate
+    % x=2*sin(0.05*t*pi);
+    % y=sin(0.1*t*pi);
+    %% circle
+    % x=0.8*cos(pi/15*t);
+    % y=0.8*sin(pi/15*t);
+    if t>15
+        theta=0.35*(t-15);
+    else theta=0;
+    end;
+    %theta=0;
+    
+    %% Desired attitude
+    qd=[x;y;theta];
+    dqd=(qd-qd_pre)/P.dt;
+    qd_pre=qd;
+    ddqd=(dqd-dqd_pre)/P.dt;
+    dqd_pre=dqd;
+    a=toc;
+    %% OMRS_controller
+    ddq=OMRS_model(OMRS_controller(qd,dqd,ddqd,q,dq),q,dq);
+    tic
+    dq=dq_pre+ddq*P.dt;
+    %dq_pre=dq;
+    q=q_pre+dq*P.dt;
+    %q_pre=q;
+    b=toc;
+    %% OMRS_NPID_controller
+    ddqN=OMRS_model(OMRS_NPID_controller(qd,dqd,ddqd,qN,dqN),qN,dqN);
+    tic
+    dqN=dqN_pre+ddqN*P.dt;
+    %dqN_pre=dqN;
+    qN=qN_pre+dqN*P.dt;
+    %qN_pre=qN;
+    
+    %% disturbance
+    if(t==25)
+        q(2)=q(2)+0.2;
+        qN(2)=qN(2)+0.2;
+    end;
+    if(t==35)
+        q(1)=q(1)+0.2;
+        qN(1)=qN(1)+0.2;
+    end;
+    dq_pre=dq;
+    q_pre=q;
+    dqN_pre=dqN;
+    qN_pre=qN;
+    %% record data
+    P.Q=[P.Q q];
+    P.QN=[P.QN qN];
+    P.QD=[P.QD qd];
+    P.U=[P.U P.uavc];
+    P.UN=[P.UN P.nuavc];
+    P.T=[P.T t];
+    P.Z1=[P.Z1 P.z1];
+    P.Z2=[P.Z2 P.z2];
+    P.Z3=[P.Z3 P.z3];
+    P.NZ1=[P.NZ1 P.nz1];
+    P.NZ2=[P.NZ2 P.nz2];
+    P.NZ3=[P.NZ3 P.nz3];
+    P.K=[P.K P.k];
+    P.NU=[P.NU P.nu];
+    P.DDQD=[P.DDQD ddqd];
+    P.DQD=[P.DQD dqd];
+    P.F=[P.F P.f];
+    
+    t2=clock;
+    T.mainLoopTime=etime(t2,t1);
+    c=toc;
+    P.mainLoopTime=a+b+c;
+    if isempty(P.time)
+        P.time=[P.mainLoopTime;P.npidTime;P.racTime;P.modelTime];
+    else
+        P.time=[P.time [P.mainLoopTime;P.npidTime;P.racTime;P.modelTime]];
+    end
+    if isempty(T.time)
+        T.time=[T.mainLoopTime;T.npidTime;T.racTime;T.modelTime];
+    else
+        T.time=[T.time [T.mainLoopTime;T.npidTime;T.racTime;T.modelTime]];
+    end
 end
 %% Display
 %% X-Y plane
@@ -192,9 +220,9 @@ set(L4,'Location','NorthWest','FontSize',6)
 hold on
 %% u3 output
 subplot(6,2,12);
-plot(P.T,P.U(3,:),'g.-.',P.T,P.UN(3,:),'r.--','linewidth',1);
+plot(P.T,P.U(3,:),'g.-.',P.T,P.UN(3,:),'r.--')
 axis([0 P.stime -40 40])
-xlabel('t(s)')%,'fontname','times new roman','fontweight','bold')
+xlabel('t(s)')
 ylabel('u_3(V)')
 hold on
 
@@ -264,9 +292,10 @@ set(L4,'Location','NorthWest','FontSize',6)
 hold on
 % u3 output
 subplot(313);
-plot(P.T,P.U(3,:),'g.-.',P.T,P.UN(3,:),'r.--','linewidth',1);
+plot(P.T,P.U(3,:),'g.-.',P.T,P.UN(3,:),'r.--')
 axis([0 P.stime -40 40])
-xlabel('t(s)','fontname','times new roman','fontweight','bold')
+%xlabel('t(s)','fontname','times new roman','fontweight','bold')
+xlabel('t(s)')
 ylabel('u_3(V)')
 hold on
 %% Traditional Format Conversion
@@ -338,5 +367,5 @@ end
 %save(['PID+NPID_LAMBDA=',num2str(P.lambda)],'P')
 num=['PID+NPID_lambda=',num2str(P.lambda)];
 save(num,'P')
-simPrintFunction()
-expPrintFunction()
+%simPrintFunction()
+%%expPrintFunction()

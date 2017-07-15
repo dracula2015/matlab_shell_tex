@@ -1,7 +1,11 @@
 function [uavc] = OMRS_NPID_controller(qd,dqd,ddqd,q,dq)
-
 global P;
+middleTime=toc;
+tic
+t3=clock;
+global T
 %%
+deta=0.001;
 Ravc=[cos(q(3)), -sin(q(3)), 0;
       sin(q(3)), cos(q(3)), 0;
       0, 0, 1];
@@ -20,6 +24,8 @@ Bavc=P.beta2*[-0.5, -0.5, 1;
               0.866, -0.866, 0;
               P.La, P.La, P.La;];
 P.f=Mavc^(-1)*Cavc*dq;
+P.ne=P.nz1-q;
+s=P.nz2-dq+P.nz1-q;
 %% NESO
 %% four order
 %    P.ne=P.nz1-q;
@@ -27,11 +33,33 @@ P.f=Mavc^(-1)*Cavc*dq;
 %    P.nz3=P.nz3+P.dt*(P.nz4-P.bt3*P.ne)
 %    P.nz2=P.nz2+P.dt*(P.nz3+(Mavc^-1)*Bavc*P.nu-P.bt2*P.ne)
 %    P.nz1=P.nz1+P.dt*(P.nz2-P.bt1*P.ne)
-%% five order
-   P.ne=P.nz1-q;
-   P.nz5=P.dt*(-P.bt5*P.ne);
-   P.nz4=P.nz4+P.dt*(P.nz5-P.bt4*P.ne);
-   P.nz3=P.nz3+P.dt*(P.nz4-P.bt3*P.ne);
+%% five order GPI
+%    P.ne=P.nz1-q;
+%    P.nz5=P.dt*(-P.bt5*P.ne);
+%    P.nz4=P.nz4+P.dt*(P.nz5-P.bt4*P.ne);
+%    P.nz3=P.nz3+P.dt*(P.nz4-P.bt3*P.ne);
+%    P.nz2=P.nz2+P.dt*(P.nz3+P.nu-P.bt2*P.ne);
+%    P.nz1=P.nz1+P.dt*(P.nz2-P.bt1*P.ne);
+
+%% five order fal s function
+%    P.nz5=P.dt*(-P.bt5*fal(s,0.0625,deta));
+%    P.nz4=P.nz4+P.dt*(P.nz5-P.bt4*fal(s,0.125,deta));
+%    P.nz3=P.nz3+P.dt*(P.nz4-P.bt3*fal(s,0.25,deta));
+%    P.nz2=P.nz2+P.dt*(P.nz3+P.nu-P.bt2*fal(s,0.5,deta));
+%    P.nz1=P.nz1+P.dt*(P.nz2-P.bt1*fal(s,1,deta));
+% %% five order fal e function
+%    P.nz5=P.dt*(-P.bt5*fal(P.ne,0.0625,deta));
+%    P.nz4=P.nz4+P.dt*(P.nz5-P.bt4*fal(P.ne,0.125,deta));
+%    P.nz3=P.nz3+P.dt*(P.nz4-P.bt3*fal(P.ne,0.25,deta));
+%    P.nz2=P.nz2+P.dt*(P.nz3+P.nu-P.bt2*fal(P.ne,0.5,deta));
+%    P.nz1=P.nz1+P.dt*(P.nz2-P.bt1*fal(P.ne,1,deta));
+   
+% %% three order fal e function
+%    P.nz3=P.nz3+P.dt*(-P.bt3*fal(P.ne,0.25,deta));
+%    P.nz2=P.nz2+P.dt*(P.nz3+P.nu-P.bt2*fal(P.ne,0.5,deta));
+%    P.nz1=P.nz1+P.dt*(P.nz2-P.bt1*fal(P.ne,1,deta));
+%% three order 
+   P.nz3=P.nz3+P.dt*(-P.bt3*P.ne);
    P.nz2=P.nz2+P.dt*(P.nz3+P.nu-P.bt2*P.ne);
    P.nz1=P.nz1+P.dt*(P.nz2-P.bt1*P.ne);
 %% error of q
@@ -132,4 +160,10 @@ P.f=Mavc^(-1)*Cavc*dq;
    %%uavc=inv(Bavc)*Mavc*(ddqd-P.Kd*(dq-dqd)-P.Kp*(q-qd))+inv(Bavc)*Cavc*dq
    P.NPIDKP=[P.NPIDKP P.k];
    P.BASCIKP=[P.BASCIKP [P.KpN(1); P.KpN(5); P.KpN(9)]];
+   t4=clock;
+   T.npidTime=etime(t4,t3);
+   P.npidTime=toc;
+   tic;
+   P.eventTime=[P.npidTime;middleTime+P.npidTime];
+%    P.npidTime=toc;
 end
