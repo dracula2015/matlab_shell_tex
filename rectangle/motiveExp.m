@@ -37,7 +37,7 @@ F0=figure('name','OptiTrack NatNet Matlab Controller','NumberTitle','off');
 %% COM port Initialization
 global s
 if strcmp('win64',computer('arch'))
-s = serial('COM8','BaudRate',57600,'DataBits',8,'Parity','none','StopBits',1,'FlowControl','none','ReadAsyncMode','continuous','ByteOrder','littleEndian');
+s = serial('COM11','BaudRate',57600,'DataBits',8,'Parity','none','StopBits',1,'FlowControl','none','ReadAsyncMode','continuous','ByteOrder','littleEndian');
 elseif strcmp('glnxa64',computer('arch'))
 s = serial('/dev/ttyUSB0','BaudRate',57600,'DataBits',8,'Parity','none','StopBits',1,'FlowControl','none','ReadAsyncMode','continuous','ByteOrder','littleEndian');
 end

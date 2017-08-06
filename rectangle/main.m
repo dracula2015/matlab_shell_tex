@@ -61,8 +61,6 @@ for t=0:P.dt:P.stime
     tic
     t1=clock;
     %% rectangle
-    
-    
     if(0<=mod(t,4*st) && mod(t,4*st)<st)
         x=mod(t,4*st);
         y=0;
