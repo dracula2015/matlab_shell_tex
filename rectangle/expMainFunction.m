@@ -1,4 +1,4 @@
-function expMainFunction2_0(source,eventdata)
+function expMainFunction(source,eventdata)
 %% ===== Initial parameters
 global startFlag stopFlag pauseFlag;
 stopFlag = false;
