@@ -1,5 +1,3 @@
-clc
-clear all
 %% ===== Initial parameters
 Parameters;
 style={'k-','b--','g-.','r:','m:'};
