@@ -1,16 +1,16 @@
-function mainFunctionmainFunction(src,eve,flag)
+function simMainFunction(source,eventdata)
 %% ===== Initial parameters
-global T
+global T stopFlag startFlag;
+stopFlag = false;
 Parameters;
 style={'k-','b--','g-.','r:','m:'};
 P.gp=10;
-
 P.lambdan=[5,10,100];
 P.lambda=5;
 P.iaeExp=[];
 P.iaeSim=[];
 
-tuning_parameter;
+%tuning_parameter;
 P.Q=[0;0;0];
 P.QN=[0;0;0];
 P.QD=[0;0;0];
@@ -56,121 +56,125 @@ set(0, 'defaultfigurecolor', 'w')
 F1=figure('Position',[40 60 1000 900],'name',['lambda = ',num2str(P.lambda)]);
 st=P.stime/4;
 %% Main loop
-if flag
-    for t=0:P.dt:P.stime
-        tic
-        t1=clock;
-        %% rectangle
-        if(0<=mod(t,4*st) && mod(t,4*st)<st)
-            x=mod(t,4*st);
-            y=0;
-        elseif(st<=mod(t,4*st) && mod(t,4*st)<2*st)
-            x=st;
-            y=mod(t,4*st)-st;
-        elseif(2*st<=mod(t,4*st) && mod(t,4*st)<3*st)
-            x=3*st-mod(t,4*st);
-            y=st;
-        elseif(3*st<=mod(t,4*st) && mod(t,4*st)<4*st)
-            x=0;
-            y=4*st-mod(t,4*st);
-        end;
-        x=x/10;
-        y=y/10;
-        %% lemniscate
-        % x=2*sin(0.05*t*pi);
-        % y=sin(0.1*t*pi);
-        %% circle
-        % x=0.8*cos(pi/15*t);
-        % y=0.8*sin(pi/15*t);
-        if t>15
-            theta=0.35*(t-15);
-        else theta=0;
-        end;
-        %theta=0;
-        
-        %% Desired attitude
-        qd=[x;y;theta];
-        dqd=(qd-qd_pre)/P.dt;
-        qd_pre=qd;
-        ddqd=(dqd-dqd_pre)/P.dt;
-        dqd_pre=dqd;
-        a=toc;
-        %% OMRS_controller
-        ddq=OMRS_model(OMRS_controller(qd,dqd,ddqd,q,dq),q,dq,P.beta0,P.beta1,P.beta2,P.m,P.La,P.Iv);
-        tic
-        dq=dq_pre+ddq*P.dt;
-        %dq_pre=dq;
-        q=q_pre+dq*P.dt;
-        %q_pre=q;
-        b=toc;
-        %% OMRS_NPID_controller
-        ddqN=OMRS_model_mex(OMRS_NPID_controller(qd,dqd,ddqd,qN,dqN),qN,dqN,P.beta0,P.beta1,P.beta2,P.m,P.La,P.Iv);
-        tic
-        dqN=dqN_pre+ddqN*P.dt;
-        %dqN_pre=dqN;
-        qN=qN_pre+dqN*P.dt;
-        %qN_pre=qN;
-        
-        %% disturbance
-        if(t==25)
-            q(2)=q(2)+0.2;
-            qN(2)=qN(2)+0.2;
-        end;
-        if(t==35)
-            q(1)=q(1)+0.2;
-            qN(1)=qN(1)+0.2;
-        end;
-        dq_pre=dq;
-        q_pre=q;
-        dqN_pre=dqN;
-        qN_pre=qN;
-        %% record data
-        P.Q=[P.Q q];
-        P.QN=[P.QN qN];
-        P.QD=[P.QD qd];
-        P.U=[P.U P.uavc];
-        P.UN=[P.UN P.nuavc];
-        P.T=[P.T t];
-        P.Z1=[P.Z1 P.z1];
-        P.Z2=[P.Z2 P.z2];
-        P.Z3=[P.Z3 P.z3];
-        P.NZ1=[P.NZ1 P.nz1];
-        P.NZ2=[P.NZ2 P.nz2];
-        P.NZ3=[P.NZ3 P.nz3];
-        P.K=[P.K P.k];
-        P.NU=[P.NU P.nu];
-        P.DDQD=[P.DDQD ddqd];
-        P.DQD=[P.DQD dqd];
-        P.F=[P.F P.f];
-        
-        t2=clock;
-        T.mainLoopTime=etime(t2,t1);
-        c=toc;
-        P.mainLoopTime=a+b+c;
-        %     if isempty(P.time)
-        %         P.time=[P.mainLoopTime;P.npidTime;P.racTime;P.modelTime];
-        %     else
-        %         P.time=[P.time [P.mainLoopTime;P.npidTime;P.racTime;P.modelTime]];
-        %     end
-        %     if isempty(T.time)
-        %         T.time=[T.mainLoopTime;T.npidTime;T.racTime;T.modelTime];
-        %     else
-        %         T.time=[T.time [T.mainLoopTime;T.npidTime;T.racTime;T.modelTime]];
-        %     end
-        if isempty(P.time)
-            P.time=[P.mainLoopTime;P.npidTime;P.racTime;];
-        else
-            P.time=[P.time [P.mainLoopTime;P.npidTime;P.racTime]];
-        end
-        if isempty(T.time)
-            T.time=[T.mainLoopTime;T.npidTime;T.racTime];
-        else
-            T.time=[T.time [T.mainLoopTime;T.npidTime;T.racTime]];
-        end
+
+for t=0:P.dt:P.stime
+    if stopFlag
+        break;
     end
+    tic
+    t1=clock;
+    %% rectangle
+    if(0<=mod(t,4*st) && mod(t,4*st)<st)
+        x=mod(t,4*st);
+        y=0;
+    elseif(st<=mod(t,4*st) && mod(t,4*st)<2*st)
+        x=st;
+        y=mod(t,4*st)-st;
+    elseif(2*st<=mod(t,4*st) && mod(t,4*st)<3*st)
+        x=3*st-mod(t,4*st);
+        y=st;
+    elseif(3*st<=mod(t,4*st) && mod(t,4*st)<4*st)
+        x=0;
+        y=4*st-mod(t,4*st);
+    end;
+    x=x/10;
+    y=y/10;
+    %% lemniscate
+    % x=2*sin(0.05*t*pi);
+    % y=sin(0.1*t*pi);
+    %% circle
+    % x=0.8*cos(pi/15*t);
+    % y=0.8*sin(pi/15*t);
+    if t>15
+        theta=0.35*(t-15);
+    else theta=0;
+    end;
+    %theta=0;
+    
+    %% Desired attitude
+    qd=[x;y;theta];
+    dqd=(qd-qd_pre)/P.dt;
+    qd_pre=qd;
+    ddqd=(dqd-dqd_pre)/P.dt;
+    dqd_pre=dqd;
+    a=toc;
+    %% OMRS_controller
+    ddq=OMRS_model(OMRS_controller(qd,dqd,ddqd,q,dq),q,dq,P.beta0,P.beta1,P.beta2,P.m,P.La,P.Iv);
+    tic
+    dq=dq_pre+ddq*P.dt;
+    %dq_pre=dq;
+    q=q_pre+dq*P.dt;
+    %q_pre=q;
+    b=toc;
+    %% OMRS_NPID_controller
+    ddqN=OMRS_model_mex(OMRS_NPID_controller(qd,dqd,ddqd,qN,dqN),qN,dqN,P.beta0,P.beta1,P.beta2,P.m,P.La,P.Iv);
+    tic
+    dqN=dqN_pre+ddqN*P.dt;
+    %dqN_pre=dqN;
+    qN=qN_pre+dqN*P.dt;
+    %qN_pre=qN;
+    
+    %% disturbance
+    if(t==25)
+        q(2)=q(2)+0.2;
+        qN(2)=qN(2)+0.2;
+    end;
+    if(t==35)
+        q(1)=q(1)+0.2;
+        qN(1)=qN(1)+0.2;
+    end;
+    dq_pre=dq;
+    q_pre=q;
+    dqN_pre=dqN;
+    qN_pre=qN;
+    %% record data
+    P.Q=[P.Q q];
+    P.QN=[P.QN qN];
+    P.QD=[P.QD qd];
+    P.U=[P.U P.uavc];
+    P.UN=[P.UN P.nuavc];
+    P.T=[P.T t];
+    P.Z1=[P.Z1 P.z1];
+    P.Z2=[P.Z2 P.z2];
+    P.Z3=[P.Z3 P.z3];
+    P.NZ1=[P.NZ1 P.nz1];
+    P.NZ2=[P.NZ2 P.nz2];
+    P.NZ3=[P.NZ3 P.nz3];
+    P.K=[P.K P.k];
+    P.NU=[P.NU P.nu];
+    P.DDQD=[P.DDQD ddqd];
+    P.DQD=[P.DQD dqd];
+    P.F=[P.F P.f];
+    
+    t2=clock;
+    T.mainLoopTime=etime(t2,t1);
+    c=toc;
+    P.mainLoopTime=a+b+c;
+    %     if isempty(P.time)
+    %         P.time=[P.mainLoopTime;P.npidTime;P.racTime;P.modelTime];
+    %     else
+    %         P.time=[P.time [P.mainLoopTime;P.npidTime;P.racTime;P.modelTime]];
+    %     end
+    %     if isempty(T.time)
+    %         T.time=[T.mainLoopTime;T.npidTime;T.racTime;T.modelTime];
+    %     else
+    %         T.time=[T.time [T.mainLoopTime;T.npidTime;T.racTime;T.modelTime]];
+    %     end
+    if isempty(P.time)
+        P.time=[P.mainLoopTime;P.npidTime;P.racTime;];
+    else
+        P.time=[P.time [P.mainLoopTime;P.npidTime;P.racTime]];
+    end
+    if isempty(T.time)
+        T.time=[T.mainLoopTime;T.npidTime;T.racTime];
+    else
+        T.time=[T.time [T.mainLoopTime;T.npidTime;T.racTime]];
+    end
+    drawnow
 end
 %% Display
 %% X-Y plane
+figure(F1);
 subplot(221);
 plot(P.QD(1,:),P.QD(2,:),'b.-',P.Q(1,:),P.Q(2,:),'g.-.',P.QN(1,:),P.QN(2,:),'r.--')
 %rectangle
@@ -353,29 +357,32 @@ if 0
 end
 
 %% New Format Conversion
-if strcmp('win64',computer('arch'))
-    figure(F2)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\xy_plane_origin.eps','epsc')
-    figure(F3)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\theta_plane_origin.eps','epsc')
-    figure(F4)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\error_origin.eps','epsc')
-    figure(F5)
-    saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\output_origin.eps','epsc')
-elseif strcmp('glnxa64',computer('arch'))
-    figure(F2)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/xy_plane_origin.eps','epsc')
-    figure(F3)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/theta_plane_origin.eps','epsc')
-    figure(F4)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/error_origin.eps','epsc')
-    figure(F5)
-    saveas(gcf,'~/Desktop/paper/latex/ieeeconf/output_origin.eps','epsc')
+if 0
+    if strcmp('win64',computer('arch'))
+        figure(F2)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\xy_plane_origin.eps','epsc')
+        figure(F3)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\theta_plane_origin.eps','epsc')
+        figure(F4)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\error_origin.eps','epsc')
+        figure(F5)
+        saveas(gcf,'C:\Users\dracula\Desktop\paper\latex\ieeeconf\output_origin.eps','epsc')
+    elseif strcmp('glnxa64',computer('arch'))
+        figure(F2)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/xy_plane_origin.eps','epsc')
+        figure(F3)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/theta_plane_origin.eps','epsc')
+        figure(F4)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/error_origin.eps','epsc')
+        figure(F5)
+        saveas(gcf,'~/Desktop/paper/latex/ieeeconf/output_origin.eps','epsc')
+    end
 end
-
 %save(['PID+NPID_LAMBDA=',num2str(P.lambda)],'P')
 num=['PID+NPID_lambda=',num2str(P.lambda)];
 save(num,'P')
 %simPrintFunction()
 %%expPrintFunction()
+clear P functions;
+startFlag = false;
 end

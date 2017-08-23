@@ -1,4 +1,8 @@
+function expMainFunction2_0(source,eventdata)
 %% ===== Initial parameters
+global startFlag stopFlag pauseFlag;
+stopFlag = false;
+pauseFlag = false;
 Parameters;
 style={'k-','b--','g-.','r:','m:'};
 P.gp=0;
@@ -22,6 +26,7 @@ P.DDQD=[0;0;0];
 P.NZ1=[0;0;0];
 P.NZ2=[0;0;0];
 P.NZ3=[0;0;0];
+P.U=[0;0;0];
 P.NU=[0;0;0];
 P.F=[0;0;0];
 P.NPIDKP=[0;0;0];
@@ -29,15 +34,16 @@ P.BASCIKP=[0;0;0];
 P.K=[0;0;0];
 P.time=[];
 P.ctrlVolt=[0;0;0];
+P.STATEST=[0;0;0;0;0;0];
 %% Initialize Figure
 set(0, 'defaultfigurecolor', 'w')
-F0=figure('name','OptiTrack NatNet Matlab Controller','NumberTitle','off');
+% F0=figure('name','OptiTrack NatNet Matlab Controller','NumberTitle','off');
 %% COM port Initialization
 global s
 if strcmp('win64',computer('arch'))
-s = serial('COM11','BaudRate',57600,'DataBits',8,'Parity','none','StopBits',1,'FlowControl','none','ReadAsyncMode','continuous','ByteOrder','littleEndian');
+    s = serial('COM11','BaudRate',57600,'DataBits',8,'Parity','none','StopBits',1,'FlowControl','none','ReadAsyncMode','continuous','ByteOrder','littleEndian');
 elseif strcmp('glnxa64',computer('arch'))
-s = serial('/dev/ttyUSB0','BaudRate',57600,'DataBits',8,'Parity','none','StopBits',1,'FlowControl','none','ReadAsyncMode','continuous','ByteOrder','littleEndian');
+    s = serial('/dev/ttyUSB0','BaudRate',57600,'DataBits',8,'Parity','none','StopBits',1,'FlowControl','none','ReadAsyncMode','continuous','ByteOrder','littleEndian');
 end
 fopen(s);
 %% Motive Initialization
@@ -97,8 +103,8 @@ try
     end
     
     %experiment initial time
-%     frameOfData=theClient.GetLastFrameOfData();
-%     initialFrameTime=frameOfData.fLatency;
+    %     frameOfData=theClient.GetLastFrameOfData();
+    %     initialFrameTime=frameOfData.fLatency;
     
     % get the mocap data
     if(usePollingTimer)
@@ -135,7 +141,10 @@ try
             ls = addlistener(theClient,'OnFrameReady2',@(src,event)FrameReadyCallback(src,event));
             display('[NatNet] FrameReady Listener added.');
             % wait until figure is closed
-            uiwait(F0);
+%             uiwait(F0);
+            while ~stopFlag 
+                drawnow
+            end;
             fwrite(s,'s');
         end
     end
@@ -171,8 +180,8 @@ filePath=fullfile(dataDir,['NPID_lambda=',num2str(P.lambda)]);
 save(filePath,'P')
 
 expDataAnalysis;
-if 1
-%% paper graphics
+if 0
+    %% paper graphics
     %% x-y plane
     F2=figure('name','x-y plane','position',[50 70 570 450]);
     plot(P.QD(1,:),P.QD(2,:),'b.-',P.QN(1,:),P.QN(2,:),'r.--')
@@ -253,4 +262,7 @@ if 1
     saveas(gcf,fullfile(dataDir,'error_exp.eps'),'epsc')
     figure(F5)
     saveas(gcf,fullfile(dataDir,'output_exp.eps'),'epsc')
+end
+clear P functions;
+startFlag = false;
 end

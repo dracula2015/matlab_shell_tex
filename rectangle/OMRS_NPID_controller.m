@@ -59,9 +59,9 @@ s=P.nz2-dq+P.nz1-q;
 %    P.nz2=P.nz2+P.dt*(P.nz3+P.nu-P.bt2*fal(P.ne,0.5,deta));
 %    P.nz1=P.nz1+P.dt*(P.nz2-P.bt1*fal(P.ne,1,deta));
 %% three order 
-   P.nz3=P.nz3+P.dt*(-P.bt3*P.ne);
-   P.nz2=P.nz2+P.dt*(P.nz3+P.nu-P.bt2*P.ne);
    P.nz1=P.nz1+P.dt*(P.nz2-P.bt1*P.ne);
+   P.nz2=P.nz2+P.dt*(P.nz3+P.nu-P.bt2*P.ne);
+   P.nz3=P.nz3+P.dt*(-P.bt3*P.ne);
 %% error of q
    edq=dq-dqd;
    eq=q-qd;   
@@ -135,7 +135,9 @@ s=P.nz2-dq+P.nz1-q;
    P.KpN=[P.wc*P.wc+P.k(1)*P.wc*P.wc 0 0;0 P.wc*P.wc+P.k(2)*P.wc*P.wc 0;0 0 P.wc*P.wc+P.k(3)*P.wc*P.wc];
    P.KdN=[2*P.w0*P.wc 0 0;0 2*P.w0*P.wc 0;0 0 2*P.w0*P.wc];
 
-   P.nu=ddqd-(P.KpN*eq)-(P.KdN*edq)-(P.nz3);
+%    P.nu=ddqd-(P.KpN*eq)-(P.KdN*edq)-(P.nz3);
+%    P.nu=ddqd-(P.KpN*eq)-(P.KdN*(P.nz2-dqd))-(P.nz3);
+   P.nu=ddqd-P.KpN*eq-P.KdN*edq+Mavc^(-1)*Cavc*dq;
    uavc=((Bavc)^-1)*Mavc*P.nu;
 %    uavc=min(uavc,24);
 %    uavc=max(uavc,-24);

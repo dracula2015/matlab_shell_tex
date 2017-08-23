@@ -3,6 +3,10 @@ tic
 t3=clock;
 global T
 global P;
+persistent integrity;
+if isempty(integrity)
+    integrity=[0;0;0];
+end
 Ravc=[cos(q(3)), -sin(q(3)), 0;
       sin(q(3)), cos(q(3)), 0;
       0, 0, 1];
@@ -47,8 +51,11 @@ Bavc=P.beta2*[-0.5, -0.5, 1;
 %% controller
    P.Kp=[P.wc*P.wc 0 0;0 P.wc*P.wc 0;0 0 P.wc*P.wc];
    P.Kd=[2*P.w0*P.wc 0 0;0 2*P.w0*P.wc 0;0 0 2*P.w0*P.wc];
-
-   P.u=ddqd-(P.Kp*eq)-(P.Kd*edq)-(P.z3);%+inv(Mavc)*Cavc*dq;
+   integrity = integrity + eq;
+   P.u=ddqd-(P.Kp*eq)-P.Kd*(edq)-P.z3;
+%    P.u=ddqd-(P.Kp*eq)-(P.Kd*(P.nz2-dqd))-(P.z3);
+%    P.u=ddqd-(P.Kp*eq)-(P.Kd*edq)-(P.z3);%-1.5*integrity;%+inv(Mavc)*Cavc*dq;
+%    P.u=ddqd-(P.Kp*eq)-(P.Kd*edq)+inv(Mavc)*Cavc*dq-1*integrity;
    uavc=((Bavc)^-1)*Mavc*P.u;
 %    uavc=min(uavc,24);
 %    uavc=max(uavc,-24);

@@ -121,10 +121,11 @@ try
             % Robot attitude
             dqN = (qN - qN_pre)/P.dt;
             ddqN = (dqN-dqN_pre)/P.dt;
+            controlEffect = OMRS_NPID_controller(qd,dqd,ddqd,qN,dqN);
             %% Calculate control voltage
-            controlVoltage = int32(1000*OMRS_NPID_controller(qd,dqd,ddqd,qN,dqN))
+            controlVoltage = int32(1000*controlEffect);
             %controlVoltage=[24000;-24000;24000];
-            P.ctrlVolt=[P.ctrlVolt controlVoltage];
+            P.ctrlVolt=[P.ctrlVolt controlEffect];
             for i = 1:3
                 if controlVoltage(i)<0
                     controlVoltage(i)=abs(controlVoltage(i))+32768;
